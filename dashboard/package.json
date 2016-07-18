@@ -1,0 +1,15 @@
+{
+  "name": "dashboard",
+  "version": "0.0.0",
+  "description": "dashboard",
+  "main": "app.js",
+  "author": {
+    "name": "Jeanie",
+    "email": ""
+  },
+  "dependencies": {
+    "express": "3.4.4",
+    "jade": "*",
+    "stylus": "*"
+  }
+}
