@@ -1,7 +1,41 @@
 ﻿doctype html
-html
-  head
-    title= title
-    link(rel='stylesheet', href='/stylesheets/style.css')
-  body
-    block content
+html(ng-ap="MyApp")
+	style.
+		.navbar {
+			background:rgba(0,0,0,0.5);   /* for latest browsers */
+		}
+		
+		.navbar-text {
+			color: white;
+			text-align: right;
+			text-decoration: bold;
+			size: 50px;
+		}
+
+		.datetime {
+			color: white;
+		}
+	
+	head
+		title= title + " - Fleep"
+		meta(name='viewport', content='width=device-width, initial-scale=1.0')
+		script(src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js')
+		script(src='//cdnjs.cloudflare.com/ajax/libs/moment.js/2.14.1/moment.min.js')
+		link(rel='stylesheet', href='//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.2.0/css/bootstrap-theme.min.css')
+		link(rel='stylesheet', href='//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.2.0/css/bootstrap.min.css')
+		link(rel='stylesheet', href='/stylesheets/style.css')
+		link(href='https://fonts.googleapis.com/css?family=Roboto', rel='stylesheet', type='text/css')
+		script(src='//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.2.0/js/bootstrap.min.js') 
+	body
+		//- block navbar
+		//- 	nav.navbar.navbar-transparent.navbar-fixed-top
+		//- 		.container-fluid
+		//- 		.navbar-header
+		//- 			ul.nav.navbar-nav.navbar-right
+		//- 				.navbar-text
+		//- 					p#datetime clock
+							
+								
+		block content
+
+	

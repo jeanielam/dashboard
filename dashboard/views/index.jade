@@ -1,5 +1,60 @@
 ﻿extends layout
-
 block content
-  h1= title
-  p Welcome to #{title}
+	style.
+		#clock {
+			font-weight: bold;
+			
+			font-variant:small-caps;
+			color: white;
+			text-align: center;
+			position:fixed;
+			top: 30%;
+			left: 45%;
+			margin-top: -100px;
+			margin-left: -150px;	
+			margin-right: -150px;		
+		}
+		#time {
+			font-size:85px;
+		}
+		#date {
+			font-size:50px;
+		}
+		#buttons {
+		  position: fixed;
+		  top: 75%;
+		  left: 50%;
+		  margin-top: -100px;
+		  margin-left: -100px;
+		}
+		
+	body
+		div#clock
+			p#time
+			p#date
+		span
+		div#buttons
+			a.button.btn.btn-default(type='button' href='/weather' name='weather')
+				| weather
+			a.button.btn.btn-default(type='button' href='/transit' name='transit')
+				| transit
+			a.button.btn.btn-default(type='button' href='/gallery' name='gallery')
+				| gallery
+			a.button.btn.btn-default(type='button' href='/settings' name='settings')
+				| settings	
+			
+	script.
+		// dynamically update the date and time
+		var time = null,date = null;
+
+		var updateDateTime = function () {		    
+		    time.html(moment().format('hh:mm:ss A'));
+		    date.html(moment().format('ddd MMM DD'));
+		};		
+
+		$( document ).ready( function() {
+		    time = $( "#time" )
+		    date = $( '#date' )
+		    updateDateTime();
+		    setInterval(updateDateTime, 1000);
+		});

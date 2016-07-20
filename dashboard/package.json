@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "description": "dashboard",
   "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
   "author": {
     "name": "Jeanie",
     "email": ""
@@ -10,6 +13,7 @@
   "dependencies": {
     "express": "3.4.4",
     "jade": "*",
+    "moment": "^2.14.1",
     "stylus": "*"
   }
 }
