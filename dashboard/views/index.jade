@@ -2,17 +2,12 @@
 block content
 	style.
 		#clock {
-			font-weight: bold;
-			
+			font-weight: bold;			
 			font-variant:small-caps;
 			color: white;
 			text-align: center;
-			position:fixed;
-			top: 30%;
-			left: 45%;
-			margin-top: -100px;
-			margin-left: -150px;	
-			margin-right: -150px;		
+			position:relative;
+				
 		}
 		#time {
 			font-size:85px;
@@ -21,28 +16,34 @@ block content
 			font-size:50px;
 		}
 		#buttons {
-		  position: fixed;
-		  top: 75%;
-		  left: 50%;
-		  margin-top: -100px;
-		  margin-left: -100px;
+			position: relative;
+			text-align: center;
 		}
 		
+		#forecast_embedded {
+			position: relative;
+			margin-top: 30px;
+		}
+		#lastUpdated {
+			color: white;
+			position: relative;
+			opacity: 0.5;
+			text-align: center;
+		}
 	body
 		div#clock
 			p#time
 			p#date
-		span
+		iframe#forecast_embedded(type='text/html', frameborder='0', height='245', width='100%', src='http://forecast.io/embed/#lat=49.259541&lon=122.898936&name=Burnaby&color=#d7ffff&font=Helvetica&units=ca&text-color=#ffffff')
+		p#lastUpdated
 		div#buttons
-			a.button.btn.btn-default(type='button' href='/weather' name='weather')
-				| weather
 			a.button.btn.btn-default(type='button' href='/transit' name='transit')
 				| transit
 			a.button.btn.btn-default(type='button' href='/gallery' name='gallery')
 				| gallery
 			a.button.btn.btn-default(type='button' href='/settings' name='settings')
 				| settings	
-			
+		
 	script.
 		// dynamically update the date and time
 		var time = null,date = null;
@@ -52,9 +53,17 @@ block content
 		    date.html(moment().format('ddd MMM DD'));
 		};		
 
+		var refreshWeather = function () {
+			$( "#forecast_embedded" ).attr( 'src', function ( i, val ) { return val; });
+			$( "#lastUpdated" ).html("Last updated at " + moment().format('hh:mm:ss A'));
+		};
+
 		$( document ).ready( function() {
 		    time = $( "#time" )
 		    date = $( '#date' )
 		    updateDateTime();
 		    setInterval(updateDateTime, 1000);
+		    // refresh the weather every 15 minutes
+		    refreshWeather();
+		    setInterval(refreshWeather, 900000);
 		});
