@@ -1,37 +1,76 @@
 extends layout
 block content
   style.
+    #title {
+      color: #ffffff;
+    }
+    #minuteText{
+      font-variant:small-caps;
+    }
+
     #circleSVG {
       margin-left:auto;
       margin-right:auto;
       display:block;
     }
-  head
-    
+
+    .thumbnail {
+      width: 25%;
+      height: 175%;
+      min-width: 220px;
+      max-width: 350px;
+      padding: 10px;
+      margin: 10px;
+      display: inline-block;
+    }
+
+    .resultBox {
+      max-width:100%;
+      max-height: 425px;
+      min-height: 400px;      
+      margin-left:10px;
+      margin-right: 10px;
+      overflow: hidden;
+      overflow-x: scroll; 
+      white-space: nowrap;
+    }
+
+    .thumbnail ul {
+      height: 75px;
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+      overflow-y: auto;
+      text-align: left;
+    }
+
+  head    
   body
     a.btn.btn-link.pull-right#refresh
       span.glyphicon.glyphicon-repeat
-    h1
+    h1#title
       | Displaying Next-Bus Times for:    
-    div
+    div(class='resultBox')
       // create a seperate element for each stop requested
-      each stop in stops
-        .col-xs-5.col-lg-3(class='resultBox')
-          .thumbnail(id=stop)
-            p
-              | #{stop}
-            svg#circleSVG(height='200', width='200', align='center')
-              g
-                circle#circle(cx='100', cy='100', r='93', stroke='black', stroke-width='10', fill='white')
-                text#minsRemaining(x='50%', y='50%', text-anchor='middle', font-family='Arial', font-size='400%', font-weight='bold')
-                text(x='50%', y='75%', text-anchor='middle', font-family='Arial', font-size='100%') 
-                  | MINUTES
-            .caption
-              ul#nextBusScheduled
+      each stop in stops        
+        .thumbnail(id=stop, class='result')
+          p
+            | #{stop}
+          svg#circleSVG(height='200', width='200', align='center')
+            g
+              circle#circle(cx='100', cy='100', r='93', stroke='black', stroke-width='10', fill='white', fill-opacity='0')
+              text#minutesRemaining(x='50%', y='50%', text-anchor='middle', font-family='Arial', font-size='400%', font-weight='bold')
+              text#minuteText(x='50%', y='75%', text-anchor='middle', font-family='Arial', font-size='100%') 
+                | minutes
+          .caption
+            ul#nextBusScheduled
 
   script.
     $(document).ready(function($) {
       refreshData();
+      // refresh bus data every minute
+      setInterval(refreshData, 60000);
     });
 
     $( '#refresh' ).on('click', function(e) {
@@ -39,14 +78,16 @@ block content
     });
 
     function refreshData() {
-      $( '.resultBox' ).each(function(e) {
-        var stop = $(this).find( '.thumbnail' ).attr( 'id' );
+      $( '.resultBox' ).find( '.thumbnail' ).each(function(e) {
+        var stop = $(this).attr( 'id' );
         $( "#routeNickname" ).text(stop);
-        var translinkAPI = {APIURL};
-       
+        var translinkAPI = {APIURL}
+      
+        // set cache to false to get updated expected leave times
         $.ajax({
           type: "GET",
           url: translinkAPI,
+          cache: false,
           success: function(data) {
             parseResults(data, stop);
           },
@@ -63,13 +104,16 @@ block content
       var firstIteration = true;
       // null the results so we don't display previous results
       $( elementID ).find( "#nextBusScheduled" ).text('');
+      $( elementID ).find( "#minutesRemaining" ).text('');
 
       var stop = $(data).find('NextBus');
       $(stop).each(function() {
         var routeNum = $(this).find( "RouteNo" ).text(),
-              routeName = $(this).find( "RouteName" ).text();       
+              routeName = $(this).find( "RouteName" ).text();   
+
         var nextArrival = $(this).find( "Schedules" );
         $(nextArrival).each(function() {
+
           var schedule = $(this).find( "Schedule" );
           $(schedule).each(function() {
             var countdown = parseInt($(this).find( "ExpectedCountdown" ).text()),
@@ -83,9 +127,14 @@ block content
             // only make the countdown border red if the next bus appearing at the stop is within 15mins
             if (firstIteration) {
               firstIteration = false;
-              $( elementID ).find( "#minsRemaining").text(countdown);
+              // display time remaining as 0 if bus is arriving after scheduled time
+              countdown < 0 ? countdown = 0 : countdown
+              $( elementID ).find( "#minutesRemaining" ).text(countdown);
               if (countdown <= 15) {
                 $( elementID ).find( '#circle' ).attr('stroke', 'red');
+                if (countdown <= 1) {
+                  $( elementID ).find( '#minuteText' ).text('minute');
+                }
               } else {
                $( elementID ).find( '#circle' ).attr('stroke', 'black');
               }
@@ -94,13 +143,8 @@ block content
         });
       });
 
-      // sort list of returned next busses in chronological order
-      var nextBusList = $( elementID ).find( '#nextBusScheduled' )
-      var resultList = nextBusList.children('li').get();
-      resultList.sort(function(a, b) {
-        return $(a).text().split(' ')[0].localeCompare($(b).text().split(' ')[0]);
-      });
-      $.each(resultList, function(idx, itm) { nextBusList.append(itm)});
+      sortBusSchedule(elementID);
+      sortDivByCountdown(elementID);
     }
 
     // time passed is of form h:mm{am/pm} or hh:mm{am/pm}
@@ -118,5 +162,25 @@ block content
       } else if (afternoon == 'am') hour = '0' + hour;
       
       return hour + ':' + time.split(':')[1].split(afternoon)[0]
-
     }
+
+    // sort list of returned next busses in chronological order
+    function sortBusSchedule(elementID) {
+      // for use in comparison date strings for ordering time
+      var tempDate = '01/01/2000 ';
+      var nextBusList = $( elementID ).find( '#nextBusScheduled' );
+      var resultList = nextBusList.children('li').get();
+      resultList.sort(function(a, b) {
+        return Date.parse(tempDate + $(a).text().split(' ')[0]) > Date.parse(tempDate + $(b).text().split(' ')[0]);
+      });
+      $.each(resultList, function(idx, itm) { nextBusList.append(itm)});
+    }
+
+    // sort returned results by minutes remaining
+    function sortDivByCountdown(elementID) {
+      sorted = $( '.resultBox' ).find( '.result' ).sort(function(a,b) {
+        return parseInt($(a).find( '#minutesRemaining' ).text()) > parseInt($(b).find( '#minutesRemaining' ).text());
+      })
+      $( '.resultBox' ).html(sorted);
+    }
+    
