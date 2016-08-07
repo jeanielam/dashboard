@@ -11,9 +11,18 @@
     "email": ""
   },
   "dependencies": {
-    "express": "3.4.4",
+    "body-parser": "^1.15.2",
+    "errorhandler": "^1.4.3",
+    "express": "4.13.4",
+    "favicon": "0.0.2",
     "jade": "*",
+    "jquery.ajax-cross-origin": "^1.1.0",
     "moment": "^2.14.1",
+    "morgan": "^1.7.0",
+    "serve-favicon": "^2.3.0",
     "stylus": "*"
+  },
+  "devDependencies": {
+    "express": "^4.13.4"
   }
 }

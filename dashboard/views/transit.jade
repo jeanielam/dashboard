@@ -1,0 +1,122 @@
+extends layout
+block content
+  style.
+    #circleSVG {
+      margin-left:auto;
+      margin-right:auto;
+      display:block;
+    }
+  head
+    
+  body
+    a.btn.btn-link.pull-right#refresh
+      span.glyphicon.glyphicon-repeat
+    h1
+      | Displaying Next-Bus Times for:    
+    div
+      // create a seperate element for each stop requested
+      each stop in stops
+        .col-xs-5.col-lg-3(class='resultBox')
+          .thumbnail(id=stop)
+            p
+              | #{stop}
+            svg#circleSVG(height='200', width='200', align='center')
+              g
+                circle#circle(cx='100', cy='100', r='93', stroke='black', stroke-width='10', fill='white')
+                text#minsRemaining(x='50%', y='50%', text-anchor='middle', font-family='Arial', font-size='400%', font-weight='bold')
+                text(x='50%', y='75%', text-anchor='middle', font-family='Arial', font-size='100%') 
+                  | MINUTES
+            .caption
+              ul#nextBusScheduled
+
+  script.
+    $(document).ready(function($) {
+      refreshData();
+    });
+
+    $( '#refresh' ).on('click', function(e) {
+      refreshData();
+    });
+
+    function refreshData() {
+      $( '.resultBox' ).each(function(e) {
+        var stop = $(this).find( '.thumbnail' ).attr( 'id' );
+        $( "#routeNickname" ).text(stop);
+        var translinkAPI = {APIURL};
+       
+        $.ajax({
+          type: "GET",
+          url: translinkAPI,
+          success: function(data) {
+            parseResults(data, stop);
+          },
+          error: function(status) {
+            console.log('die');
+            console.log(status);
+          }
+        });      
+      });
+    }
+
+    function parseResults(data, stopNo) {
+      var elementID = '#' + stopNo;
+      var firstIteration = true;
+      // null the results so we don't display previous results
+      $( elementID ).find( "#nextBusScheduled" ).text('');
+
+      var stop = $(data).find('NextBus');
+      $(stop).each(function() {
+        var routeNum = $(this).find( "RouteNo" ).text(),
+              routeName = $(this).find( "RouteName" ).text();       
+        var nextArrival = $(this).find( "Schedules" );
+        $(nextArrival).each(function() {
+          var schedule = $(this).find( "Schedule" );
+          $(schedule).each(function() {
+            var countdown = parseInt($(this).find( "ExpectedCountdown" ).text()),
+            // remove date stamp from expected leave time
+              arrivalTime = $(this).find( "ExpectedLeaveTime" ).text().split(' ')[0],
+              destination = $(this).find( "Destination" ).text();
+            arrivalTime = convertTo24Hr(arrivalTime);
+            $( elementID ).find( "#nextBusScheduled" ).append('<li>' + arrivalTime + ' - ' + routeNum + ' ' + destination + '</li>');
+            
+            
+            // only make the countdown border red if the next bus appearing at the stop is within 15mins
+            if (firstIteration) {
+              firstIteration = false;
+              $( elementID ).find( "#minsRemaining").text(countdown);
+              if (countdown <= 15) {
+                $( elementID ).find( '#circle' ).attr('stroke', 'red');
+              } else {
+               $( elementID ).find( '#circle' ).attr('stroke', 'black');
+              }
+            }            
+          });          
+        });
+      });
+
+      // sort list of returned next busses in chronological order
+      var nextBusList = $( elementID ).find( '#nextBusScheduled' )
+      var resultList = nextBusList.children('li').get();
+      resultList.sort(function(a, b) {
+        return $(a).text().split(' ')[0].localeCompare($(b).text().split(' ')[0]);
+      });
+      $.each(resultList, function(idx, itm) { nextBusList.append(itm)});
+    }
+
+    // time passed is of form h:mm{am/pm} or hh:mm{am/pm}
+    // returns the time in 24 hour clock format
+    function convertTo24Hr(time) {
+      // convert hour to integer to add 12 for pm values
+      var hour = parseInt(time.split(':')[0]);
+      var afternoon = time.substr(time.length - 2, time.length)
+
+      if (afternoon =='pm' && hour != 12) {
+        hour += 12;
+        
+      } else if (hour == 12 && afternoon == 'am') {
+        hour = '00';
+      } else if (afternoon == 'am') hour = '0' + hour;
+      
+      return hour + ':' + time.split(':')[1].split(afternoon)[0]
+
+    }

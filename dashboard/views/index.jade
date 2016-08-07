@@ -34,15 +34,16 @@ block content
 		div#clock
 			p#time
 			p#date
-		iframe#forecast_embedded(type='text/html', frameborder='0', height='245', width='100%', src='http://forecast.io/embed/#lat=49.259541&lon=122.898936&name=Burnaby&color=#d7ffff&font=Helvetica&units=ca&text-color=#ffffff')
+		//iframe#forecast_embedded(type='text/html', frameborder='0', height='245', width='100%', src='http://forecast.io/embed/#lat=49.259541&lon=122.898936&name=Burnaby&color=#d7ffff&font=Helvetica&units=ca&text-color=#ffffff')
+		iframe#forecast_embedded(type='text/html', frameborder='0', height='245', width='100%', src='http://forecast.io/embed/#lat=49.259541&lon=122.898936&name=Burnaby&color=#778899&font=Helvetica&units=ca&text-color=#ffffff')
 		p#lastUpdated
 		div#buttons
 			a.button.btn.btn-default(type='button' href='/transit' name='transit')
 				| transit
 			a.button.btn.btn-default(type='button' href='/gallery' name='gallery')
 				| gallery
-			a.button.btn.btn-default(type='button' href='/settings' name='settings')
-				| settings	
+			a.button.btn.btn-default(type='button' href='http://192.168.5.217/admin' name='settings')
+				| Pi-hole Stats	
 		
 	script.
 		// dynamically update the date and time
