@@ -16,3 +16,8 @@ exports.transit = function(req, res) {
 	res.render('transit', {title: 'Transit', stops: stops});
 };
 
+exports.stats = function(req, res) {
+	
+	res.render('stats', {title: 'Statistics'});
+}
+

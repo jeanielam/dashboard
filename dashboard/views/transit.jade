@@ -60,13 +60,14 @@ block content
       text-align: left;
     }
 
-
   head    
   body
     a.btn.btn-link.pull-right#refresh
       span.glyphicon.glyphicon-repeat
+    a.btn.btn-link.btn-lg.pull-left#back(onclick='goBack()')
+      span.glyphicon.glyphicon-arrow-left
     h1#title
-      | Displaying Next-Bus Times for:    
+      | Displaying Next-Bus Times for:
     div(class='resultBox')
       // create a seperate element for each stop requested
       each stop in stops        
@@ -96,7 +97,7 @@ block content
     function refreshData() {
       $( '.resultBox' ).find( '.thumbnail' ).each(function(e) {
         var stop = $(this).attr( 'id' );
-        var translinkAPI = {APIURL};
+        var translinkAPI = {APIKEY}
       
         // set cache to false to get updated expected leave times
         $.ajax({
@@ -105,6 +106,7 @@ block content
           cache: false,
           success: function(data) {
             parseResults(data, stop);
+            $( "#lastUpdated" ).html("Last updated at " + moment().format('hh:mm:ss A'));
           },
           error: function(status) {
             console.log('die');
@@ -197,5 +199,10 @@ block content
         return parseInt($(a).find( '#minutesRemaining' ).text()) > parseInt($(b).find( '#minutesRemaining' ).text());
       })
       $( '.resultBox' ).html(sorted);
+    }
+
+    // return to the previous webpage
+    function goBack() {
+      window.history.back();
     }
     
